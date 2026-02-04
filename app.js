@@ -1,8 +1,3 @@
-/**
- * WebAudio Keyboard - Main Application
- * A synthesizer keyboard with ADSR envelope, polyphony, and synesthesia visuals
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   // ===== FREQUENCY MAP =====
   const keyboardFrequencyMap = {
@@ -32,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     '85': 987.766602512248223,  //U - B
   };
 
-  // ===== KEYBOARD UI SETUP =====
+  // Keyboard
   const octaves = [
     {
       white: [
@@ -100,12 +95,12 @@ document.addEventListener("DOMContentLoaded", () => {
     kbdEl.appendChild(octaveDiv);
   }
 
-  // ===== AUDIO CONTEXT =====
+  // audio context
   let audioCtx = null;
   let globalGain = null;
   const activeVoices = {};
 
-  // ===== WAVEFORM SELECTION =====
+  // waveform selection
   const waveforms = [
     { value: 'sine', label: 'Sine' },
     { value: 'sawtooth', label: 'Saw' },
@@ -135,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateWaveDisplay();
   });
 
-  // ===== CONTROL ELEMENTS =====
+  // controls
   const masterVolEl = document.getElementById("masterVol");
   const harmonyEl = document.getElementById("harmony");
   const attackEl = document.getElementById("attack");
@@ -144,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const releaseEl = document.getElementById("release");
   const enableBtn = document.getElementById("enableAudio");
 
-  // ===== AUDIO FUNCTIONS =====
+  // audio functions
   function ensureAudio() {
     if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -153,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     globalGain.connect(audioCtx.destination);
   }
 
-  // Manual anti-clipping: scale each voice by 1/sqrt(N)
+  // manual anti clipping, scale each voice by 1/sqrt(N)
   function updatePerVoiceGains() {
     const keys = Object.keys(activeVoices);
     const n = keys.length || 1;
@@ -191,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     voice.osc.stop(stopTime);
   }
 
-  // ===== SYNESTHESIA COLORS =====
+  // colors for notes
   const noteColors = {
     'C': { hue: 0, sat: 85, light: 65 },
     'C#': { hue: 25, sat: 90, light: 60 },
@@ -235,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     
-    // Blend multiple colors - circular average for hue
+    // blend multiple colors, get circular average for hue
     let sinSum = 0, cosSum = 0;
     let satSum = 0, lightSum = 0;
     
@@ -278,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeNoteColors.set(keyCode, noteColor);
     updateBlendedBackground();
     
-    // Create multiple bursts
+    // create multiple bursts
     const numBursts = 2 + Math.floor(Math.random() * 2);
     
     for (let i = 0; i < numBursts; i++) {
@@ -308,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => burst.remove(), duration + i * 100);
     }
     
-    // Create floating particles
+    // create floating particles
     const numParticles = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < numParticles; i++) {
       const particle = document.createElement('div');
@@ -335,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateBlendedBackground();
   }
 
-  // ===== NOTE PLAYING =====
+  // play note
   function playNote(keyCode, freqOverride = null) {
     ensureAudio();
     if (!keyboardFrequencyMap[keyCode]) return;
@@ -369,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
     removeNoteColor(keyCode);
   }
 
-  // ===== KEYBOARD EVENT HANDLERS =====
+  // keyboard handlers
   function keyDown(event) {
     const key = (event.detail || event.which).toString();
     if (!keyboardFrequencyMap[key]) return;
@@ -395,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("keydown", keyDown, false);
   window.addEventListener("keyup", keyUp, false);
 
-  // ===== UI EVENT HANDLERS =====
+  // ui event handlers
   enableBtn.addEventListener("click", async () => {
     ensureAudio();
     if (audioCtx.state === "suspended") await audioCtx.resume();
