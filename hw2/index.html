@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Webaudio Synth Lab 2</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Synesthesia color layer -->
+  <div class="synesthesia-layer" id="synesthesiaLayer">
+    <div class="blend-layer" id="blendLayer"></div>
+  </div>
+
+  <!-- SYNTH INSTRUMENT -->
+  <div class="keyboard-body">
+    <div class="keyboard-top">
+      <!-- Controls bar: Left | Center | Right -->
+      <div class="controls-bar">
+        <!-- Left side: Volume, Synth Mode -->
+        <div class="controls-left">
+          <div class="control-group">
+            <label>Volume</label>
+            <div class="knob-wrapper">
+              <div class="knob" id="volumeKnob"></div>
+              <input type="range" id="masterVol" class="knob-input" min="0" max="1" step="0.02" value="0.50" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Mode</label>
+            <div class="mode-selector" id="modeSelector">
+              <button class="mode-btn active" data-mode="additive">ADD</button>
+              <button class="mode-btn" data-mode="am">AM</button>
+              <button class="mode-btn" data-mode="fm">FM</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Synthesis parameter display -->
+        <div class="controls-center">
+          <div class="display-wrapper">
+            <button class="wave-btn" id="paramPrev">◀</button>
+            <div class="display-panel">
+              <span class="label" id="paramDisplay">Partials: 6</span>
+            </div>
+            <button class="wave-btn" id="paramNext">▶</button>
+          </div>
+        </div>
+
+        <!-- Right side: ADSR Faders -->
+        <div class="controls-right">
+          <div class="adsr-group">
+            <div class="slider-group">
+              <label>A</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="attackThumb"></div>
+                </div>
+                <input type="range" id="attack" class="fader-input" min="0.001" max="0.5" step="0.001" value="0.010" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>D</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="decayThumb"></div>
+                </div>
+                <input type="range" id="decay" class="fader-input" min="0.001" max="0.5" step="0.001" value="0.100" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>S</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="sustainThumb"></div>
+                </div>
+                <input type="range" id="sustain" class="fader-input" min="0.05" max="1" step="0.01" value="0.70" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>R</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="releaseThumb"></div>
+                </div>
+                <input type="range" id="release" class="fader-input" min="0.01" max="1.5" step="0.01" value="0.30" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary controls row: Synthesis parameters + LFO -->
+      <div class="controls-bar secondary">
+        <!-- Synthesis Parameters -->
+        <div class="controls-left">
+          <!-- Additive: Partials -->
+          <div class="control-group synth-param" data-for="additive">
+            <label>Partials</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="partialsKnob"></div>
+              <input type="range" id="partials" class="knob-input" min="1" max="16" step="1" value="6" />
+            </div>
+          </div>
+
+          <!-- Additive: Rolloff -->
+          <div class="control-group synth-param" data-for="additive">
+            <label>Rolloff</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="rolloffKnob"></div>
+              <input type="range" id="rolloff" class="knob-input" min="0.5" max="3" step="0.1" value="1.0" />
+            </div>
+          </div>
+
+          <!-- AM: Mod Freq -->
+          <div class="control-group synth-param hidden" data-for="am">
+            <label>Mod Hz</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="amFreqKnob"></div>
+              <input type="range" id="amFreq" class="knob-input" min="0.5" max="100" step="0.5" value="5" />
+            </div>
+          </div>
+
+          <!-- AM: Mod Depth -->
+          <div class="control-group synth-param hidden" data-for="am">
+            <label>Depth</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="amDepthKnob"></div>
+              <input type="range" id="amDepth" class="knob-input" min="0" max="1" step="0.01" value="0.5" />
+            </div>
+          </div>
+
+          <!-- FM: Mod Ratio -->
+          <div class="control-group synth-param hidden" data-for="fm">
+            <label>Ratio</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="fmRatioKnob"></div>
+              <input type="range" id="fmRatio" class="knob-input" min="0.5" max="8" step="0.1" value="2" />
+            </div>
+          </div>
+
+          <!-- FM: Mod Index -->
+          <div class="control-group synth-param hidden" data-for="fm">
+            <label>Index</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="fmIndexKnob"></div>
+              <input type="range" id="fmIndex" class="knob-input" min="0" max="20" step="0.1" value="5" />
+            </div>
+          </div>
+        </div>
+
+        <!-- LFO Controls -->
+        <div class="controls-right">
+          <div class="control-group">
+            <label>LFO</label>
+            <div class="mode-selector small" id="lfoTarget">
+              <button class="mode-btn small active" data-target="none">Off</button>
+              <button class="mode-btn small" data-target="amplitude">Amp</button>
+              <button class="mode-btn small" data-target="pitch">Vib</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Rate</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="lfoRateKnob"></div>
+              <input type="range" id="lfoRate" class="knob-input" min="0.1" max="20" step="0.1" value="5" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Depth</label>
+            <div class="knob-wrapper small">
+              <div class="knob small" id="lfoDepthKnob"></div>
+              <input type="range" id="lfoDepth" class="knob-input" min="0" max="1" step="0.01" value="0.3" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keys area -->
+      <div class="keys-recess">
+        <div class="kbd" id="kbd"></div>
+      </div>
+
+      <div class="keyboard-front"></div>
+      <div class="keyboard-left"></div>
+      <div class="keyboard-right"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn" id="enableAudio">Enable Audio</button>
+    <span class="footer-text">Play: Z–M (low) • Q–U (high)</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
