@@ -23,6 +23,7 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
 }
 
 .blend-layer {
@@ -30,45 +31,42 @@ body {
   width: 100%;
   height: 100%;
   transition: background 0.3s ease;
+  will-change: background;
 }
 
 .color-burst {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(60px);
   opacity: 0;
-  animation: burst 3s ease-out forwards;
+  animation: burst 2.5s ease-out forwards;
   mix-blend-mode: screen;
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 @keyframes burst {
   0% {
-    transform: translate(-50%, -50%) scale(0.2);
-    opacity: 0.9;
-  }
-  30% {
-    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0.8;
   }
   100% {
-    transform: translate(-50%, -50%) scale(3);
+    transform: translate(-50%, -50%) scale(2.5);
     opacity: 0;
   }
 }
 
 .color-burst.rising {
-  animation: burst-rise 3.5s ease-out forwards;
+  animation: burst-rise 2.5s ease-out forwards;
 }
 
 @keyframes burst-rise {
   0% {
-    transform: translate(-50%, 0%) scale(0.3);
-    opacity: 0.85;
-  }
-  50% {
-    opacity: 0.6;
+    transform: translate(-50%, 0%) scale(0.4);
+    opacity: 0.75;
   }
   100% {
-    transform: translate(-50%, -150%) scale(2.5);
+    transform: translate(-50%, -120%) scale(2);
     opacity: 0;
   }
 }
@@ -76,19 +74,21 @@ body {
 .color-particle {
   position: absolute;
   border-radius: 50%;
-  filter: blur(40px);
+  filter: blur(30px);
   opacity: 0;
-  animation: float-up 2.5s ease-out forwards;
+  animation: float-up 2s ease-out forwards;
   mix-blend-mode: screen;
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 @keyframes float-up {
   0% {
     transform: translateY(0) scale(0.5);
-    opacity: 0.7;
+    opacity: 0.6;
   }
   100% {
-    transform: translateY(-200px) scale(1.5);
+    transform: translateY(-150px) scale(1.2);
     opacity: 0;
   }
 }

@@ -484,6 +484,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const blendLayer = document.getElementById('blendLayer');
   const activeNoteColors = new Map();
 
+  // Limit visual elements to prevent performance issues
+  const MAX_BURSTS = 12;
+  const MAX_PARTICLES = 15;
+  let activeBursts = 0;
+  let activeParticles = 0;
+  let lastBurstTime = 0;
+  const BURST_THROTTLE_MS = 50; // Minimum time between burst creations
+
   function updateBlendedBackground() {
     const colors = Array.from(activeNoteColors.values());
     
@@ -541,8 +549,21 @@ document.addEventListener("DOMContentLoaded", () => {
     activeNoteColors.set(keyCode, noteColor);
     updateBlendedBackground();
     
-    const numBursts = 2 + Math.floor(Math.random() * 2);
+    // Throttle burst creation to prevent UI overload
+    const now = performance.now();
+    if (now - lastBurstTime < BURST_THROTTLE_MS) return;
+    lastBurstTime = now;
+    
+    // Skip if too many elements already
+    if (activeBursts >= MAX_BURSTS) return;
+    
+    // Create just 1 burst when under load, 2 otherwise
+    const numBursts = activeBursts > MAX_BURSTS / 2 ? 1 : 2;
+    
     for (let i = 0; i < numBursts; i++) {
+      if (activeBursts >= MAX_BURSTS) break;
+      activeBursts++;
+      
       const burst = document.createElement('div');
       const isRising = Math.random() > 0.4;
       burst.className = isRising ? 'color-burst rising' : 'color-burst';
@@ -552,40 +573,37 @@ document.addEventListener("DOMContentLoaded", () => {
       const baseSize = 180 + (1000 - freq) * 0.25;
       const size = Math.max(120, Math.min(350, baseSize + Math.random() * 80));
       
-      burst.style.left = `${x}%`;
-      burst.style.top = `${y}%`;
-      burst.style.width = `${size}px`;
-      burst.style.height = `${size}px`;
-      burst.style.animationDelay = `${i * 0.1}s`;
-      burst.style.background = `radial-gradient(circle, 
-        hsla(${hue}, ${sat}%, ${light}%, 0.85) 0%, 
-        hsla(${hue}, ${sat + 5}%, ${light - 5}%, 0.5) 35%, 
-        hsla(${(hue + 20) % 360}, ${sat}%, ${light}%, 0.2) 60%, 
-        transparent 70%)`;
+      burst.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;background:radial-gradient(circle,hsla(${hue},${sat}%,${light}%,0.85) 0%,hsla(${hue},${sat+5}%,${light-5}%,0.5) 35%,transparent 70%)`;
       
       synesthesiaLayer.appendChild(burst);
       const duration = isRising ? 3500 : 3000;
-      setTimeout(() => burst.remove(), duration + i * 100);
+      setTimeout(() => {
+        burst.remove();
+        activeBursts--;
+      }, duration);
     }
     
-    const numParticles = 3 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < numParticles; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'color-particle';
+    // Create particles only if we have room
+    if (activeParticles < MAX_PARTICLES) {
+      const numParticles = Math.min(2, MAX_PARTICLES - activeParticles);
       
-      const x = Math.random() * 100;
-      const y = 50 + Math.random() * 50;
-      const size = 30 + Math.random() * 50;
-      
-      particle.style.left = `${x}%`;
-      particle.style.top = `${y}%`;
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      particle.style.animationDelay = `${Math.random() * 0.3}s`;
-      particle.style.background = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
-      
-      synesthesiaLayer.appendChild(particle);
-      setTimeout(() => particle.remove(), 2800);
+      for (let i = 0; i < numParticles; i++) {
+        activeParticles++;
+        const particle = document.createElement('div');
+        particle.className = 'color-particle';
+        
+        const x = Math.random() * 100;
+        const y = 50 + Math.random() * 50;
+        const size = 30 + Math.random() * 50;
+        
+        particle.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;background:hsla(${hue},${sat}%,${light}%,0.6)`;
+        
+        synesthesiaLayer.appendChild(particle);
+        setTimeout(() => {
+          particle.remove();
+          activeParticles--;
+        }, 2500);
+      }
     }
   }
 
