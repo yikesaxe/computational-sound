@@ -469,8 +469,13 @@ body {
 .key {
   position: relative;
   cursor: pointer;
-  transition: transform 50ms ease, box-shadow 50ms ease;
+  transition: transform 50ms ease, box-shadow 50ms ease, background 50ms ease;
   transform-style: preserve-3d;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  will-change: transform, box-shadow;
 }
 
 /* White keys */
@@ -540,6 +545,7 @@ body {
   height: 12px;
   background: #0a0a0a;
   z-index: -1;
+  will-change: background;
 }
 
 .key.black::after {

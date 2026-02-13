@@ -624,21 +624,79 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== KEYBOARD HANDLERS =====
+  const activeKeys = new Set(); // Track currently pressed keys to prevent double-triggers
+
   function keyDown(event) {
     const key = (event.detail || event.which).toString();
     if (!keyboardFrequencyMap[key]) return;
-    if (activeVoices[key]) return;
+    if (activeKeys.has(key)) return; // Already pressed
+    activeKeys.add(key);
     playNote(key);
   }
 
   function keyUp(event) {
     const key = (event.detail || event.which).toString();
     if (!keyboardFrequencyMap[key]) return;
+    activeKeys.delete(key);
     stopNote(key);
   }
 
   window.addEventListener("keydown", keyDown, false);
   window.addEventListener("keyup", keyUp, false);
+
+  // ===== MOUSE/TOUCH HANDLERS FOR ON-SCREEN KEYS =====
+  let mouseDownKey = null;
+
+  keyEls.forEach((el, code) => {
+    // Mouse events
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      if (activeKeys.has(code)) return;
+      activeKeys.add(code);
+      mouseDownKey = code;
+      playNote(code);
+    });
+
+    el.addEventListener('mouseup', (e) => {
+      e.preventDefault();
+      if (mouseDownKey === code) {
+        activeKeys.delete(code);
+        stopNote(code);
+        mouseDownKey = null;
+      }
+    });
+
+    el.addEventListener('mouseleave', (e) => {
+      if (mouseDownKey === code) {
+        activeKeys.delete(code);
+        stopNote(code);
+        mouseDownKey = null;
+      }
+    });
+
+    // Touch events
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (activeKeys.has(code)) return;
+      activeKeys.add(code);
+      playNote(code);
+    }, { passive: false });
+
+    el.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      activeKeys.delete(code);
+      stopNote(code);
+    }, { passive: false });
+  });
+
+  // Handle mouse up outside of keys
+  document.addEventListener('mouseup', () => {
+    if (mouseDownKey) {
+      activeKeys.delete(mouseDownKey);
+      stopNote(mouseDownKey);
+      mouseDownKey = null;
+    }
+  });
 
   // ===== UI HANDLERS =====
   enableBtn.addEventListener("click", async () => {
