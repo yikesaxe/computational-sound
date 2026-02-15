@@ -140,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const decayEl = document.getElementById("decay");
   const sustainEl = document.getElementById("sustain");
   const releaseEl = document.getElementById("release");
-  const enableBtn = document.getElementById("enableAudio");
 
   // Additive params
   const partialsEl = document.getElementById("partials");
@@ -644,15 +643,6 @@ document.addEventListener("DOMContentLoaded", () => {
       stopNote(mouseDownKey);
       mouseDownKey = null;
     }
-  });
-
-  // ===== UI HANDLERS =====
-  enableBtn.addEventListener("click", async () => {
-    ensureAudio();
-    if (audioCtx.state === "suspended") await audioCtx.resume();
-    enableBtn.textContent = "ENABLED";
-    enableBtn.classList.add("enabled");
-    enableBtn.disabled = true;
   });
 
   // ===== KNOB ROTATION & VALUE DISPLAY =====
