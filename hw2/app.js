@@ -100,6 +100,45 @@ document.addEventListener("DOMContentLoaded", () => {
   let globalGain = null;
   const activeVoices = {};
 
+  // ===== LCD DISPLAY =====
+  const lcdMode = document.getElementById('lcdMode');
+  const lcdParam1Label = document.getElementById('lcdParam1Label');
+  const lcdParam1Value = document.getElementById('lcdParam1Value');
+  const lcdParam2Label = document.getElementById('lcdParam2Label');
+  const lcdParam2Value = document.getElementById('lcdParam2Value');
+  const lcdLfo = document.getElementById('lcdLfo');
+
+  function updateLCD() {
+    // Update mode
+    lcdMode.textContent = currentMode.toUpperCase();
+    
+    // Update parameters based on mode
+    switch (currentMode) {
+      case 'additive':
+        lcdParam1Label.textContent = 'PARTIALS';
+        lcdParam1Value.textContent = partialsEl.value;
+        lcdParam2Label.textContent = 'ROLLOFF';
+        lcdParam2Value.textContent = parseFloat(rolloffEl.value).toFixed(1);
+        break;
+      case 'am':
+        lcdParam1Label.textContent = 'MOD FREQ';
+        lcdParam1Value.textContent = parseFloat(amFreqEl.value).toFixed(1) + 'Hz';
+        lcdParam2Label.textContent = 'DEPTH';
+        lcdParam2Value.textContent = Math.round(parseFloat(amDepthEl.value) * 100) + '%';
+        break;
+      case 'fm':
+        lcdParam1Label.textContent = 'RATIO';
+        lcdParam1Value.textContent = parseFloat(fmRatioEl.value).toFixed(1);
+        lcdParam2Label.textContent = 'INDEX';
+        lcdParam2Value.textContent = parseFloat(fmIndexEl.value).toFixed(1);
+        break;
+    }
+    
+    // Update LFO
+    const lfoLabels = { 'none': 'OFF', 'amplitude': 'AMP', 'pitch': 'PITCH' };
+    lcdLfo.textContent = lfoLabels[currentLfoTarget] || 'OFF';
+  }
+
   // ===== SYNTHESIS MODE =====
   let currentMode = 'additive';
   const modeBtns = document.querySelectorAll('.mode-btn');
@@ -117,6 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
     knobUnits.forEach(unit => {
       unit.classList.toggle('dimmed', unit.dataset.mode !== mode);
     });
+    
+    // Update LCD
+    updateLCD();
   }
 
   modeBtns.forEach(btn => {
@@ -131,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener('click', () => {
       currentLfoTarget = btn.dataset.target;
       lfoTargetBtns.forEach(b => b.classList.toggle('active', b === btn));
+      updateLCD();
     });
   });
 
@@ -685,9 +728,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (input === masterVolEl && globalGain) {
         globalGain.gain.setTargetAtTime(parseFloat(masterVolEl.value), audioCtx.currentTime, 0.01);
       }
+      // Update LCD when synth params change
+      updateLCD();
     });
   });
 
-  // Initialize mode
+  // Initialize mode and LCD
   updateSynthMode('additive');
+  updateLCD();
 });
