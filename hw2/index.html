@@ -13,154 +13,174 @@
     <div class="blend-layer" id="blendLayer"></div>
   </div>
 
-  <!-- SYNTH INSTRUMENT -->
-  <div class="synth-container">
-    
-    <!-- Top Panel: Mode + Master -->
-    <div class="top-panel">
-      <div class="panel-section mode-section">
-        <div class="section-label">SYNTHESIS</div>
-        <div class="mode-buttons">
-          <button class="mode-btn active" data-mode="additive">ADDITIVE</button>
-          <button class="mode-btn" data-mode="am">AM</button>
-          <button class="mode-btn" data-mode="fm">FM</button>
-        </div>
-      </div>
+  <!-- KEYBOARD INSTRUMENT (3D body like hw1) -->
+  <div class="keyboard-body">
+    <div class="keyboard-top">
       
-      <div class="panel-section master-section">
-        <div class="section-label">MASTER</div>
-        <div class="knob-group">
-          <div class="knob-unit">
-            <div class="knob" id="volumeKnob"></div>
-            <input type="range" id="masterVol" class="knob-input" min="0" max="1" step="0.02" value="0.50" />
+      <!-- Top row: Mode selector + Master -->
+      <div class="controls-bar">
+        <div class="controls-left">
+          <div class="control-group">
+            <label>Volume</label>
+            <div class="knob-wrapper">
+              <div class="knob" id="volumeKnob"></div>
+              <input type="range" id="masterVol" class="knob-input" min="0" max="1" step="0.02" value="0.50" />
+            </div>
             <span class="knob-value" id="volumeValue">0.50</span>
-            <span class="knob-label">VOLUME</span>
           </div>
         </div>
-        <button class="enable-btn" id="enableAudio">ENABLE</button>
-      </div>
-    </div>
 
-    <!-- Main Controls Panel -->
-    <div class="controls-panel">
-      
-      <!-- OSCILLATOR Section -->
-      <div class="panel-section osc-section">
-        <div class="section-label">OSCILLATOR</div>
-        <div class="knob-row">
-          <!-- Additive params -->
-          <div class="knob-unit" data-mode="additive">
-            <div class="knob" id="partialsKnob"></div>
-            <input type="range" id="partials" class="knob-input" min="1" max="16" step="1" value="6" />
-            <span class="knob-value" id="partialsValue">6</span>
-            <span class="knob-label">PARTIALS</span>
+        <div class="controls-center">
+          <div class="mode-buttons">
+            <button class="mode-btn active" data-mode="additive">ADDITIVE</button>
+            <button class="mode-btn" data-mode="am">AM</button>
+            <button class="mode-btn" data-mode="fm">FM</button>
           </div>
-          <div class="knob-unit" data-mode="additive">
-            <div class="knob" id="rolloffKnob"></div>
-            <input type="range" id="rolloff" class="knob-input" min="0.5" max="3" step="0.1" value="1.0" />
-            <span class="knob-value" id="rolloffValue">1.0</span>
-            <span class="knob-label">ROLLOFF</span>
-          </div>
-          
-          <!-- AM params -->
-          <div class="knob-unit" data-mode="am">
-            <div class="knob" id="amFreqKnob"></div>
-            <input type="range" id="amFreq" class="knob-input" min="0.5" max="100" step="0.5" value="5" />
-            <span class="knob-value" id="amFreqValue">5.0</span>
-            <span class="knob-label">MOD FREQ</span>
-          </div>
-          <div class="knob-unit" data-mode="am">
-            <div class="knob" id="amDepthKnob"></div>
-            <input type="range" id="amDepth" class="knob-input" min="0" max="1" step="0.01" value="0.5" />
-            <span class="knob-value" id="amDepthValue">0.50</span>
-            <span class="knob-label">MOD DEPTH</span>
-          </div>
-          
-          <!-- FM params -->
-          <div class="knob-unit" data-mode="fm">
-            <div class="knob" id="fmRatioKnob"></div>
-            <input type="range" id="fmRatio" class="knob-input" min="0.5" max="8" step="0.1" value="2" />
-            <span class="knob-value" id="fmRatioValue">2.0</span>
-            <span class="knob-label">RATIO</span>
-          </div>
-          <div class="knob-unit" data-mode="fm">
-            <div class="knob" id="fmIndexKnob"></div>
-            <input type="range" id="fmIndex" class="knob-input" min="0" max="20" step="0.1" value="5" />
-            <span class="knob-value" id="fmIndexValue">5.0</span>
-            <span class="knob-label">INDEX</span>
-          </div>
+        </div>
+
+        <div class="controls-right">
+          <button class="enable-btn" id="enableAudio">ENABLE</button>
         </div>
       </div>
 
-      <!-- ENVELOPE Section -->
-      <div class="panel-section env-section">
-        <div class="section-label">ENVELOPE</div>
-        <div class="knob-row">
-          <div class="knob-unit">
-            <div class="knob" id="attackKnob"></div>
-            <input type="range" id="attack" class="knob-input" min="0.001" max="0.5" step="0.001" value="0.010" />
-            <span class="knob-value" id="attackValue">10ms</span>
-            <span class="knob-label">ATTACK</span>
-          </div>
-          <div class="knob-unit">
-            <div class="knob" id="decayKnob"></div>
-            <input type="range" id="decay" class="knob-input" min="0.001" max="0.5" step="0.001" value="0.100" />
-            <span class="knob-value" id="decayValue">100ms</span>
-            <span class="knob-label">DECAY</span>
-          </div>
-          <div class="knob-unit">
-            <div class="knob" id="sustainKnob"></div>
-            <input type="range" id="sustain" class="knob-input" min="0.05" max="1" step="0.01" value="0.70" />
-            <span class="knob-value" id="sustainValue">70%</span>
-            <span class="knob-label">SUSTAIN</span>
-          </div>
-          <div class="knob-unit">
-            <div class="knob" id="releaseKnob"></div>
-            <input type="range" id="release" class="knob-input" min="0.01" max="1.5" step="0.01" value="0.30" />
-            <span class="knob-value" id="releaseValue">300ms</span>
-            <span class="knob-label">RELEASE</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- LFO Section -->
-      <div class="panel-section lfo-section">
-        <div class="section-label">LFO</div>
-        <div class="knob-row">
-          <div class="lfo-target-group">
-            <span class="knob-label">TARGET</span>
-            <div class="target-buttons" id="lfoTarget">
-              <button class="target-btn active" data-target="none">OFF</button>
-              <button class="target-btn" data-target="amplitude">AMP</button>
-              <button class="target-btn" data-target="pitch">PITCH</button>
+      <!-- Second row: Synth parameters -->
+      <div class="controls-bar">
+        <!-- Oscillator section -->
+        <div class="section-group">
+          <span class="section-label">OSC</span>
+          <div class="knob-row">
+            <div class="knob-unit" data-mode="additive">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="partialsKnob"></div>
+                <input type="range" id="partials" class="knob-input" min="1" max="16" step="1" value="6" />
+              </div>
+              <span class="knob-value" id="partialsValue">6</span>
+              <span class="knob-label">Partials</span>
+            </div>
+            <div class="knob-unit" data-mode="additive">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="rolloffKnob"></div>
+                <input type="range" id="rolloff" class="knob-input" min="0.5" max="3" step="0.1" value="1.0" />
+              </div>
+              <span class="knob-value" id="rolloffValue">1.0</span>
+              <span class="knob-label">Rolloff</span>
+            </div>
+            <div class="knob-unit" data-mode="am">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="amFreqKnob"></div>
+                <input type="range" id="amFreq" class="knob-input" min="0.5" max="100" step="0.5" value="5" />
+              </div>
+              <span class="knob-value" id="amFreqValue">5.0</span>
+              <span class="knob-label">Mod Hz</span>
+            </div>
+            <div class="knob-unit" data-mode="am">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="amDepthKnob"></div>
+                <input type="range" id="amDepth" class="knob-input" min="0" max="1" step="0.01" value="0.5" />
+              </div>
+              <span class="knob-value" id="amDepthValue">0.50</span>
+              <span class="knob-label">Depth</span>
+            </div>
+            <div class="knob-unit" data-mode="fm">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="fmRatioKnob"></div>
+                <input type="range" id="fmRatio" class="knob-input" min="0.5" max="8" step="0.1" value="2" />
+              </div>
+              <span class="knob-value" id="fmRatioValue">2.0</span>
+              <span class="knob-label">Ratio</span>
+            </div>
+            <div class="knob-unit" data-mode="fm">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="fmIndexKnob"></div>
+                <input type="range" id="fmIndex" class="knob-input" min="0" max="20" step="0.1" value="5" />
+              </div>
+              <span class="knob-value" id="fmIndexValue">5.0</span>
+              <span class="knob-label">Index</span>
             </div>
           </div>
-          <div class="knob-unit">
-            <div class="knob" id="lfoRateKnob"></div>
-            <input type="range" id="lfoRate" class="knob-input" min="0.1" max="20" step="0.1" value="5" />
-            <span class="knob-value" id="lfoRateValue">5.0 Hz</span>
-            <span class="knob-label">RATE</span>
+        </div>
+
+        <!-- LFO section -->
+        <div class="section-group">
+          <span class="section-label">LFO</span>
+          <div class="knob-row">
+            <div class="lfo-target" id="lfoTarget">
+              <button class="target-btn active" data-target="none">Off</button>
+              <button class="target-btn" data-target="amplitude">Amp</button>
+              <button class="target-btn" data-target="pitch">Vib</button>
+            </div>
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="lfoRateKnob"></div>
+                <input type="range" id="lfoRate" class="knob-input" min="0.1" max="20" step="0.1" value="5" />
+              </div>
+              <span class="knob-value" id="lfoRateValue">5.0</span>
+              <span class="knob-label">Rate</span>
+            </div>
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="lfoDepthKnob"></div>
+                <input type="range" id="lfoDepth" class="knob-input" min="0" max="1" step="0.01" value="0.3" />
+              </div>
+              <span class="knob-value" id="lfoDepthValue">30%</span>
+              <span class="knob-label">Amt</span>
+            </div>
           </div>
-          <div class="knob-unit">
-            <div class="knob" id="lfoDepthKnob"></div>
-            <input type="range" id="lfoDepth" class="knob-input" min="0" max="1" step="0.01" value="0.3" />
-            <span class="knob-value" id="lfoDepthValue">30%</span>
-            <span class="knob-label">AMOUNT</span>
+        </div>
+
+        <!-- ADSR section -->
+        <div class="section-group">
+          <span class="section-label">ENV</span>
+          <div class="knob-row">
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="attackKnob"></div>
+                <input type="range" id="attack" class="knob-input" min="0.001" max="0.5" step="0.001" value="0.010" />
+              </div>
+              <span class="knob-value" id="attackValue">10ms</span>
+              <span class="knob-label">A</span>
+            </div>
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="decayKnob"></div>
+                <input type="range" id="decay" class="knob-input" min="0.001" max="0.5" step="0.001" value="0.100" />
+              </div>
+              <span class="knob-value" id="decayValue">100ms</span>
+              <span class="knob-label">D</span>
+            </div>
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="sustainKnob"></div>
+                <input type="range" id="sustain" class="knob-input" min="0.05" max="1" step="0.01" value="0.70" />
+              </div>
+              <span class="knob-value" id="sustainValue">70%</span>
+              <span class="knob-label">S</span>
+            </div>
+            <div class="knob-unit">
+              <div class="knob-wrapper small">
+                <div class="knob small" id="releaseKnob"></div>
+                <input type="range" id="release" class="knob-input" min="0.01" max="1.5" step="0.01" value="0.30" />
+              </div>
+              <span class="knob-value" id="releaseValue">300ms</span>
+              <span class="knob-label">R</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Keyboard -->
-    <div class="keyboard-panel">
+      <!-- Keys area -->
       <div class="keys-recess">
         <div class="kbd" id="kbd"></div>
       </div>
-    </div>
 
-    <div class="footer-hint">
-      Play: Z–M (low octave) • Q–U (high octave) • Click keys with mouse
+      <div class="keyboard-front"></div>
+      <div class="keyboard-left"></div>
+      <div class="keyboard-right"></div>
     </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-text">Play: Z–M (low) • Q–U (high)</span>
   </div>
 
   <script src="app.js"></script>

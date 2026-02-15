@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== SYNTHESIS MODE =====
   let currentMode = 'additive';
-  const modeBtns = document.querySelectorAll('.mode-btn[data-mode]');
+  const modeBtns = document.querySelectorAll('.mode-btn');
   const knobUnits = document.querySelectorAll('.knob-unit[data-mode]');
 
   function updateSynthMode(mode) {
@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== LFO TARGET =====
   let currentLfoTarget = 'none';
-  const lfoTargetBtns = document.querySelectorAll('#lfoTarget .target-btn');
+  const lfoTargetBtns = document.querySelectorAll('.target-btn');
   
   lfoTargetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
