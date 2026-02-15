@@ -180,11 +180,24 @@ body {
   align-items: center;
   padding: 0 10px;
   gap: 2px;
-  min-width: 70px;
+  min-width: 65px;
 }
 
-.display-cell:first-child {
-  min-width: 75px;
+/* Fixed widths to prevent layout shift */
+.display-cell:nth-child(1) {
+  width: 85px;  /* MODE: fits "ADDITIVE" */
+}
+
+.display-cell:nth-child(3) {
+  width: 70px;  /* Param1: fits "MOD FREQ" */
+}
+
+.display-cell:nth-child(5) {
+  width: 55px;  /* Param2 */
+}
+
+.display-cell:nth-child(7) {
+  width: 50px;  /* LFO */
 }
 
 .display-divider {
