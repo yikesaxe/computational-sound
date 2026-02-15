@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Webaudio Keyboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Synesthesia color layer -->
+  <div class="synesthesia-layer" id="synesthesiaLayer">
+    <div class="blend-layer" id="blendLayer"></div>
+  </div>
+
+  <!-- KEYBOARD INSTRUMENT -->
+  <div class="keyboard-body">
+    <div class="keyboard-top">
+      <!-- Controls bar: Left | Center | Right -->
+      <div class="controls-bar">
+        <!-- Left side: Volume, Harmony -->
+        <div class="controls-left">
+          <div class="control-group">
+            <label>Volume</label>
+            <div class="knob-wrapper">
+              <div class="knob" id="volumeKnob"></div>
+              <input type="range" id="masterVol" class="knob-input" min="0" max="1" step="0.02" value="0.80" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Harmony</label>
+            <div class="toggle-switch" id="harmonyToggle">
+              <input type="checkbox" id="harmony" class="toggle-input" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Waveform display with nav buttons -->
+        <div class="controls-center">
+          <div class="display-wrapper">
+            <button class="wave-btn" id="wavePrev">◀</button>
+            <div class="display-panel">
+              <span class="label" id="waveDisplay">Saw</span>
+            </div>
+            <button class="wave-btn" id="waveNext">▶</button>
+          </div>
+        </div>
+
+        <!-- Right side: ADSR Faders -->
+        <div class="controls-right">
+          <div class="adsr-group">
+            <div class="slider-group">
+              <label>A</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="attackThumb"></div>
+                </div>
+                <input type="range" id="attack" class="fader-input" min="0.001" max="0.25" step="0.001" value="0.010" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>D</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="decayThumb"></div>
+                </div>
+                <input type="range" id="decay" class="fader-input" min="0.001" max="0.35" step="0.001" value="0.080" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>S</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="sustainThumb"></div>
+                </div>
+                <input type="range" id="sustain" class="fader-input" min="0.05" max="1" step="0.01" value="0.55" />
+              </div>
+            </div>
+
+            <div class="slider-group">
+              <label>R</label>
+              <div class="fader-wrapper">
+                <div class="fader-track">
+                  <div class="fader-thumb" id="releaseThumb"></div>
+                </div>
+                <input type="range" id="release" class="fader-input" min="0.01" max="1.5" step="0.01" value="0.25" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- area for keys -->
+      <div class="keys-recess">
+        <div class="kbd" id="kbd"></div>
+      </div>
+
+      <div class="keyboard-front"></div>
+      <div class="keyboard-left"></div>
+      <div class="keyboard-right"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn" id="enableAudio">Enable Audio</button>
+    <span class="footer-text">Play: Z–M (low) • Q–U (high)</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
