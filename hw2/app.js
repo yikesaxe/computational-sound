@@ -102,68 +102,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===== SYNTHESIS MODE =====
   let currentMode = 'additive';
-  const modeBtns = document.querySelectorAll('#modeSelector .mode-btn');
-  const synthParams = document.querySelectorAll('.synth-param');
+  const modeBtns = document.querySelectorAll('.mode-btn[data-mode]');
+  const knobUnits = document.querySelectorAll('.knob-unit[data-mode]');
 
   function updateSynthMode(mode) {
     currentMode = mode;
+    
+    // Update mode buttons
     modeBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mode === mode);
     });
-    synthParams.forEach(param => {
-      param.classList.toggle('hidden', param.dataset.for !== mode);
+    
+    // Show/dim knob units based on mode
+    knobUnits.forEach(unit => {
+      unit.classList.toggle('dimmed', unit.dataset.mode !== mode);
     });
-    updateParamDisplay();
   }
 
   modeBtns.forEach(btn => {
     btn.addEventListener('click', () => updateSynthMode(btn.dataset.mode));
   });
 
-  // ===== PARAMETER DISPLAY =====
-  const paramDisplay = document.getElementById('paramDisplay');
-  const paramPrev = document.getElementById('paramPrev');
-  const paramNext = document.getElementById('paramNext');
-
-  const paramConfigs = {
-    additive: [
-      { id: 'partials', label: 'Partials', format: v => Math.round(v) },
-      { id: 'rolloff', label: 'Rolloff', format: v => parseFloat(v).toFixed(1) }
-    ],
-    am: [
-      { id: 'amFreq', label: 'Mod Hz', format: v => parseFloat(v).toFixed(1) },
-      { id: 'amDepth', label: 'Depth', format: v => parseFloat(v).toFixed(2) }
-    ],
-    fm: [
-      { id: 'fmRatio', label: 'Ratio', format: v => parseFloat(v).toFixed(1) },
-      { id: 'fmIndex', label: 'Index', format: v => parseFloat(v).toFixed(1) }
-    ]
-  };
-
-  let currentParamIndex = 0;
-
-  function updateParamDisplay() {
-    const params = paramConfigs[currentMode];
-    if (!params || params.length === 0) {
-      paramDisplay.textContent = currentMode.toUpperCase();
-      return;
-    }
-    currentParamIndex = Math.min(currentParamIndex, params.length - 1);
-    const param = params[currentParamIndex];
-    const input = document.getElementById(param.id);
-    paramDisplay.textContent = `${param.label}: ${param.format(input.value)}`;
-  }
-
-  paramPrev.addEventListener('click', () => {
-    const params = paramConfigs[currentMode];
-    currentParamIndex = (currentParamIndex - 1 + params.length) % params.length;
-    updateParamDisplay();
-  });
-
-  paramNext.addEventListener('click', () => {
-    const params = paramConfigs[currentMode];
-    currentParamIndex = (currentParamIndex + 1) % params.length;
-    updateParamDisplay();
+  // ===== LFO TARGET =====
+  let currentLfoTarget = 'none';
+  const lfoTargetBtns = document.querySelectorAll('#lfoTarget .target-btn');
+  
+  lfoTargetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentLfoTarget = btn.dataset.target;
+      lfoTargetBtns.forEach(b => b.classList.toggle('active', b === btn));
+    });
   });
 
   // ===== CONTROLS =====
@@ -189,15 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // LFO params
   const lfoRateEl = document.getElementById("lfoRate");
   const lfoDepthEl = document.getElementById("lfoDepth");
-  let currentLfoTarget = 'none';
-
-  const lfoTargetBtns = document.querySelectorAll('#lfoTarget .mode-btn');
-  lfoTargetBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentLfoTarget = btn.dataset.target;
-      lfoTargetBtns.forEach(b => b.classList.toggle('active', b === btn));
-    });
-  });
 
   // ===== AUDIO INIT =====
   function ensureAudio() {
@@ -244,7 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
     voice.voiceGain.gain.setTargetAtTime(eps, t0, Math.max(0.01, R / 6));
     const stopTime = t0 + R + 0.1;
 
-    // Stop all oscillators
     if (voice.oscillators) {
       voice.oscillators.forEach(osc => {
         try { osc.stop(stopTime); } catch(e) {}
@@ -253,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (voice.osc) {
       try { voice.osc.stop(stopTime); } catch(e) {}
     }
-    // Stop constant sources
     if (voice.sources) {
       voice.sources.forEach(src => {
         try { src.stop(stopTime); } catch(e) {}
@@ -286,9 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
       oscillators.push(osc);
     }
 
-    // Apply LFO if targeting amplitude
     applyLFOToGain(voiceGain);
-
     const baseLevel = 0.35;
     applyADSR(voiceGain, baseLevel);
 
@@ -304,38 +259,30 @@ document.addEventListener("DOMContentLoaded", () => {
     voiceGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
     voiceGain.connect(globalGain);
 
-    // Carrier oscillator
     const carrier = audioCtx.createOscillator();
     carrier.type = 'sine';
     carrier.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-    // Modulator oscillator
     const modulator = audioCtx.createOscillator();
     modulator.type = 'sine';
     modulator.frequency.setValueAtTime(modFreq, audioCtx.currentTime);
 
-    // AM gain node
     const amGain = audioCtx.createGain();
     amGain.gain.setValueAtTime(1 - modDepth * 0.5, audioCtx.currentTime);
 
-    // Modulation depth gain
     const modGain = audioCtx.createGain();
     modGain.gain.setValueAtTime(modDepth * 0.5, audioCtx.currentTime);
 
-    // Connect modulator to AM gain's gain parameter
     modulator.connect(modGain);
     modGain.connect(amGain.gain);
 
-    // Connect carrier through AM gain
     carrier.connect(amGain);
     amGain.connect(voiceGain);
 
     carrier.start();
     modulator.start();
 
-    // Apply LFO
     applyLFOToGain(voiceGain);
-
     const baseLevel = 0.35;
     applyADSR(voiceGain, baseLevel);
 
@@ -354,33 +301,26 @@ document.addEventListener("DOMContentLoaded", () => {
     voiceGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
     voiceGain.connect(globalGain);
 
-    // Modulator oscillator
     const modulator = audioCtx.createOscillator();
     modulator.type = 'sine';
     modulator.frequency.setValueAtTime(modFreq, audioCtx.currentTime);
 
-    // Modulation depth
     const modGain = audioCtx.createGain();
     modGain.gain.setValueAtTime(modAmount, audioCtx.currentTime);
 
-    // Carrier oscillator
     const carrier = audioCtx.createOscillator();
     carrier.type = 'sine';
     carrier.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-    // Connect modulator to carrier frequency
     modulator.connect(modGain);
     modGain.connect(carrier.frequency);
 
-    // Connect carrier to output
     carrier.connect(voiceGain);
 
     modulator.start();
     carrier.start();
 
-    // Apply LFO
     applyLFOToGain(voiceGain);
-
     const baseLevel = 0.35;
     applyADSR(voiceGain, baseLevel);
 
@@ -419,7 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
     lfo.frequency.setValueAtTime(lfoRate, audioCtx.currentTime);
 
     const lfoGainNode = audioCtx.createGain();
-    // Vibrato depth: up to 50 cents (half semitone)
     lfoGainNode.gain.setValueAtTime(freq * lfoDepth * 0.03, audioCtx.currentTime);
 
     lfo.connect(lfoGainNode);
@@ -429,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return lfo;
   }
 
-  // ===== CREATE VOICE (based on mode) =====
+  // ===== CREATE VOICE =====
   function createVoice(freq) {
     let voice;
     switch (currentMode) {
@@ -446,7 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
         voice = createAdditiveVoice(freq);
     }
 
-    // Apply pitch LFO to first oscillator if needed
     if (currentLfoTarget === 'pitch' && voice.oscillators && voice.oscillators[0]) {
       const lfoOsc = applyLFOToPitch(voice.oscillators[0], freq);
       if (lfoOsc) {
@@ -484,13 +422,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const blendLayer = document.getElementById('blendLayer');
   const activeNoteColors = new Map();
 
-  // Limit visual elements to prevent performance issues
   const MAX_BURSTS = 12;
   const MAX_PARTICLES = 15;
   let activeBursts = 0;
   let activeParticles = 0;
   let lastBurstTime = 0;
-  const BURST_THROTTLE_MS = 50; // Minimum time between burst creations
+  const BURST_THROTTLE_MS = 50;
 
   function updateBlendedBackground() {
     const colors = Array.from(activeNoteColors.values());
@@ -549,15 +486,12 @@ document.addEventListener("DOMContentLoaded", () => {
     activeNoteColors.set(keyCode, noteColor);
     updateBlendedBackground();
     
-    // Throttle burst creation to prevent UI overload
     const now = performance.now();
     if (now - lastBurstTime < BURST_THROTTLE_MS) return;
     lastBurstTime = now;
     
-    // Skip if too many elements already
     if (activeBursts >= MAX_BURSTS) return;
     
-    // Create just 1 burst when under load, 2 otherwise
     const numBursts = activeBursts > MAX_BURSTS / 2 ? 1 : 2;
     
     for (let i = 0; i < numBursts; i++) {
@@ -583,7 +517,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }, duration);
     }
     
-    // Create particles only if we have room
     if (activeParticles < MAX_PARTICLES) {
       const numParticles = Math.min(2, MAX_PARTICLES - activeParticles);
       
@@ -642,12 +575,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== KEYBOARD HANDLERS =====
-  const activeKeys = new Set(); // Track currently pressed keys to prevent double-triggers
+  const activeKeys = new Set();
 
   function keyDown(event) {
     const key = (event.detail || event.which).toString();
     if (!keyboardFrequencyMap[key]) return;
-    if (activeKeys.has(key)) return; // Already pressed
+    if (activeKeys.has(key)) return;
     activeKeys.add(key);
     playNote(key);
   }
@@ -662,11 +595,10 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("keydown", keyDown, false);
   window.addEventListener("keyup", keyUp, false);
 
-  // ===== MOUSE/TOUCH HANDLERS FOR ON-SCREEN KEYS =====
+  // ===== MOUSE/TOUCH HANDLERS =====
   let mouseDownKey = null;
 
   keyEls.forEach((el, code) => {
-    // Mouse events
     el.addEventListener('mousedown', (e) => {
       e.preventDefault();
       if (activeKeys.has(code)) return;
@@ -692,7 +624,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Touch events
     el.addEventListener('touchstart', (e) => {
       e.preventDefault();
       if (activeKeys.has(code)) return;
@@ -707,7 +638,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { passive: false });
   });
 
-  // Handle mouse up outside of keys
   document.addEventListener('mouseup', () => {
     if (mouseDownKey) {
       activeKeys.delete(mouseDownKey);
@@ -720,68 +650,54 @@ document.addEventListener("DOMContentLoaded", () => {
   enableBtn.addEventListener("click", async () => {
     ensureAudio();
     if (audioCtx.state === "suspended") await audioCtx.resume();
-    enableBtn.textContent = "Audio Enabled ✓";
+    enableBtn.textContent = "ENABLED";
+    enableBtn.classList.add("enabled");
     enableBtn.disabled = true;
   });
 
-  // Volume knob
-  const volumeKnob = document.getElementById('volumeKnob');
-  function updateKnobRotation(knob, value, min = 0, max = 1) {
-    const percent = (value - min) / (max - min);
-    const rotation = -120 + (percent * 240);
-    knob.style.transform = `rotate(${rotation}deg)`;
+  // ===== KNOB ROTATION & VALUE DISPLAY =====
+  function updateKnob(inputEl, knobId, valueId, formatter) {
+    const knob = document.getElementById(knobId);
+    const valueEl = document.getElementById(valueId);
+    const val = parseFloat(inputEl.value);
+    const min = parseFloat(inputEl.min);
+    const max = parseFloat(inputEl.max);
+    const percent = (val - min) / (max - min);
+    const rotation = -135 + (percent * 270);
+    
+    if (knob) knob.style.transform = `rotate(${rotation}deg)`;
+    if (valueEl) valueEl.textContent = formatter(val);
   }
 
-  updateKnobRotation(volumeKnob, parseFloat(masterVolEl.value));
-
-  masterVolEl.addEventListener("input", () => {
-    updateKnobRotation(volumeKnob, parseFloat(masterVolEl.value));
-    if (!globalGain) return;
-    globalGain.gain.setTargetAtTime(parseFloat(masterVolEl.value), audioCtx.currentTime, 0.01);
-  });
-
-  // Synth param knobs
+  // Define all knob configurations
   const knobConfigs = [
-    { input: partialsEl, knob: document.getElementById('partialsKnob'), min: 1, max: 16 },
-    { input: rolloffEl, knob: document.getElementById('rolloffKnob'), min: 0.5, max: 3 },
-    { input: amFreqEl, knob: document.getElementById('amFreqKnob'), min: 0.5, max: 100 },
-    { input: amDepthEl, knob: document.getElementById('amDepthKnob'), min: 0, max: 1 },
-    { input: fmRatioEl, knob: document.getElementById('fmRatioKnob'), min: 0.5, max: 8 },
-    { input: fmIndexEl, knob: document.getElementById('fmIndexKnob'), min: 0, max: 20 },
-    { input: lfoRateEl, knob: document.getElementById('lfoRateKnob'), min: 0.1, max: 20 },
-    { input: lfoDepthEl, knob: document.getElementById('lfoDepthKnob'), min: 0, max: 1 }
+    { input: masterVolEl, knobId: 'volumeKnob', valueId: 'volumeValue', format: v => v.toFixed(2) },
+    { input: partialsEl, knobId: 'partialsKnob', valueId: 'partialsValue', format: v => Math.round(v) },
+    { input: rolloffEl, knobId: 'rolloffKnob', valueId: 'rolloffValue', format: v => v.toFixed(1) },
+    { input: amFreqEl, knobId: 'amFreqKnob', valueId: 'amFreqValue', format: v => v.toFixed(1) },
+    { input: amDepthEl, knobId: 'amDepthKnob', valueId: 'amDepthValue', format: v => v.toFixed(2) },
+    { input: fmRatioEl, knobId: 'fmRatioKnob', valueId: 'fmRatioValue', format: v => v.toFixed(1) },
+    { input: fmIndexEl, knobId: 'fmIndexKnob', valueId: 'fmIndexValue', format: v => v.toFixed(1) },
+    { input: attackEl, knobId: 'attackKnob', valueId: 'attackValue', format: v => Math.round(v * 1000) + 'ms' },
+    { input: decayEl, knobId: 'decayKnob', valueId: 'decayValue', format: v => Math.round(v * 1000) + 'ms' },
+    { input: sustainEl, knobId: 'sustainKnob', valueId: 'sustainValue', format: v => Math.round(v * 100) + '%' },
+    { input: releaseEl, knobId: 'releaseKnob', valueId: 'releaseValue', format: v => Math.round(v * 1000) + 'ms' },
+    { input: lfoRateEl, knobId: 'lfoRateKnob', valueId: 'lfoRateValue', format: v => v.toFixed(1) + ' Hz' },
+    { input: lfoDepthEl, knobId: 'lfoDepthKnob', valueId: 'lfoDepthValue', format: v => Math.round(v * 100) + '%' },
   ];
 
-  knobConfigs.forEach(({ input, knob, min, max }) => {
-    if (!input || !knob) return;
-    updateKnobRotation(knob, parseFloat(input.value), min, max);
+  // Initialize and attach listeners
+  knobConfigs.forEach(({ input, knobId, valueId, format }) => {
+    if (!input) return;
+    updateKnob(input, knobId, valueId, format);
     input.addEventListener('input', () => {
-      updateKnobRotation(knob, parseFloat(input.value), min, max);
-      updateParamDisplay();
+      updateKnob(input, knobId, valueId, format);
+      if (input === masterVolEl && globalGain) {
+        globalGain.gain.setTargetAtTime(parseFloat(masterVolEl.value), audioCtx.currentTime, 0.01);
+      }
     });
   });
 
-  // Fader thumb positioning
-  function updateFaderThumb(input, thumbId) {
-    const thumb = document.getElementById(thumbId);
-    if (!thumb) return;
-    const min = parseFloat(input.min);
-    const max = parseFloat(input.max);
-    const val = parseFloat(input.value);
-    const percent = (val - min) / (max - min);
-    thumb.style.bottom = `${percent * 75}%`;
-  }
-
-  updateFaderThumb(attackEl, 'attackThumb');
-  updateFaderThumb(decayEl, 'decayThumb');
-  updateFaderThumb(sustainEl, 'sustainThumb');
-  updateFaderThumb(releaseEl, 'releaseThumb');
-
-  attackEl.addEventListener("input", () => updateFaderThumb(attackEl, 'attackThumb'));
-  decayEl.addEventListener("input", () => updateFaderThumb(decayEl, 'decayThumb'));
-  sustainEl.addEventListener("input", () => updateFaderThumb(sustainEl, 'sustainThumb'));
-  releaseEl.addEventListener("input", () => updateFaderThumb(releaseEl, 'releaseThumb'));
-
-  // Initialize
-  updateParamDisplay();
+  // Initialize mode
+  updateSynthMode('additive');
 });
